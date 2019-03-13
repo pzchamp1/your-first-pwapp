@@ -404,4 +404,8 @@
              .then(function() {console.log('Service Worker Registered');});
   }
 
+  window.addEventListener('beforeinstallprompt', function(event) {
+    console.log("before install prompt")
+    event.prompt();
+  })
 })();
