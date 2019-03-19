@@ -84,20 +84,20 @@
   // doesn't already exist, it's cloned from the template.
   app.updateForecastCard = function(data) {
     var dataLastUpdated = new Date(data.created);
-    var sunrise = data.channel.astronomy.sunrise;
-    var sunset = data.channel.astronomy.sunset;
-    var current = data.channel.item.condition;
-    var humidity = data.channel.atmosphere.humidity;
-    var wind = data.channel.wind;
+    var sunrise = data.current_observation.astronomy.sunrise; //data.channel.astronomy.sunrise;
+    var sunset = data.current_observation.astronomy.sunset; //data.channel.astronomy.sunset;
+    var current = data.current_observation.condition;//data.channel.item.condition;
+    var humidity = data.current_observation.atmosphere.humidity;//data.channel.atmosphere.humidity;
+    var wind = data.current_observation.wind;//data.channel.wind;
 
-    var card = app.visibleCards[data.key];
+    var card = app.visibleCards[data.location.woeid];
     if (!card) {
       card = app.cardTemplate.cloneNode(true);
       card.classList.remove('cardTemplate');
-      card.querySelector('.location').textContent = data.label;
+      card.querySelector('.location').textContent = data.location.city;//data.label
       card.removeAttribute('hidden');
       app.container.appendChild(card);
-      app.visibleCards[data.key] = card;
+      app.visibleCards[data.location.woeid] = card;
     }
 
     // Verifies the data provide is newer than what's already visible
@@ -112,13 +112,13 @@
         return;
       }
     }
-    cardLastUpdatedElem.textContent = data.created;
+    cardLastUpdatedElem.textContent = data.current_observation.pubDate//data.created;
 
     card.querySelector('.description').textContent = current.text;
     card.querySelector('.date').textContent = current.date;
     card.querySelector('.current .icon').classList.add(app.getIconClass(current.code));
     card.querySelector('.current .temperature .value').textContent =
-      Math.round(current.temp);
+      Math.round(current.temperature);
     card.querySelector('.current .sunrise').textContent = sunrise;
     card.querySelector('.current .sunset').textContent = sunset;
     card.querySelector('.current .humidity').textContent =
@@ -131,7 +131,7 @@
     today = today.getDay();
     for (var i = 0; i < 7; i++) {
       var nextDay = nextDays[i];
-      var daily = data.channel.item.forecast[i];
+      var daily = data.forecasts[i];
       if (daily && nextDay) {
         nextDay.querySelector('.date').textContent =
           app.daysOfWeek[(i + today) % 7];
@@ -196,7 +196,7 @@
           var results = response.query.results;
           results.key = key;
           results.label = label;
-          results.created = response.query.created;
+          results.created = response.query.current_observation.pubDate;
           app.updateForecastCard(results);
         }
       } else {
@@ -327,41 +327,116 @@
     }
   };
 
-  var initialWeatherForecastChicago = {
-    key: '2379574',
-    label: 'Chicago, IL',
-    created: '2016-07-22T01:00:00Z',
-    channel: {
-      astronomy: {
-        sunrise: "5:43 am",
-        sunset: "8:21 pm"
-      },
-      item: {
-        condition: {
-          text: "Windy",
-          date: "Thu, 21 Jul 2016 09:00 PM EDT",
-          temp: 88,
-          code: 24
-        },
-        forecast: [
-          {code: 44, high: 86, low: 70},
-          {code: 44, high: 94, low: 73},
-          {code: 4, high: 95, low: 78},
-          {code: 24, high: 75, low: 89},
-          {code: 24, high: 89, low: 77},
-          {code: 44, high: 92, low: 79},
-          {code: 44, high: 89, low: 77}
-        ]
-      },
-      atmosphere: {
-        humidity: 99
-      },
-      wind: {
-        speed: 66,
-        direction: 444
-      }
-    }
-  };
+  var initialWeatherForecast_new = {
+    "location":{
+       "woeid":2502265,
+       "city":"Sunnyvale",
+       "region":" CA",
+       "country":"United States",
+       "lat":37.371609,
+       "long":-122.038254,
+       "timezone_id":"America/Los_Angeles"
+    },
+    "current_observation":{
+       "wind":{
+          "chill":52,
+          "direction":270,
+          "speed":0.62
+       },
+       "atmosphere":{
+          "humidity":72,
+          "visibility":10.0,
+          "pressure":29.71,
+          "rising":0
+       },
+       "astronomy":{
+          "sunrise":"7:15 am",
+          "sunset":"7:18 pm"
+       },
+       "condition":{
+          "text":"Partly Cloudy",
+          "code":29,
+          "temperature":52
+       },
+       "pubDate":1552914000
+    },
+    "forecasts":[
+       {
+          "low":51,
+          "high":74,
+          "code":34
+       },
+       {
+          "low":51,
+          "high":68,
+          "code":39
+       },
+       {
+          "day":"Wed",
+          "date":1553065200,
+          "low":53,
+          "high":59,
+          "text":"Rain",
+          "code":12
+       },
+       {
+          "day":"Thu",
+          "date":1553151600,
+          "low":50,
+          "high":61,
+          "text":"Rain",
+          "code":12
+       },
+       {
+          "day":"Fri",
+          "date":1553238000,
+          "low":46,
+          "high":62,
+          "text":"Rain",
+          "code":12
+       },
+       {
+          "day":"Sat",
+          "date":1553324400,
+          "low":48,
+          "high":62,
+          "text":"Rain",
+          "code":12
+       },
+       {
+          "day":"Sun",
+          "date":1553410800,
+          "low":48,
+          "high":66,
+          "text":"Partly Cloudy",
+          "code":30
+       },
+       {
+          "day":"Mon",
+          "date":1553497200,
+          "low":47,
+          "high":65,
+          "text":"Mostly Cloudy",
+          "code":28
+       },
+       {
+          "day":"Tue",
+          "date":1553583600,
+          "low":47,
+          "high":62,
+          "text":"Rain",
+          "code":12
+       },
+       {
+          "day":"Wed",
+          "date":1553670000,
+          "low":49,
+          "high":61,
+          "text":"Scattered Showers",
+          "code":39
+       }
+    ]
+ }
   // TODO uncomment line below to test app with fake data
       //app.updateForecastCard(initialWeatherForecast);
 
@@ -378,23 +453,26 @@
      ************************************************************************/
 
   app.selectedCities = localStorage.selectedCities;
-  if (app.selectedCities) {
-    app.selectedCities = JSON.parse(app.selectedCities);
-    app.selectedCities.forEach(function(city) {
-      app.getForecast(city.key, city.label);
-    });
-  } else {
-    /* The user is using the app for the first time, or the user has not
-     * saved any cities, so show the user some fake data. A real app in this
-     * scenario could guess the user's location via IP lookup and then inject
-     * that data into the page.
-     */
-    app.updateForecastCard(initialWeatherForecast);
-    app.selectedCities = [
-      {key: initialWeatherForecast.key, label: initialWeatherForecast.label}
-    ];
-    app.saveSelectedCities();
-  }
+// -DEBUG
+  app.updateForecastCard(initialWeatherForecast_new);
+// -DEBUG
+  // if (app.selectedCities) {
+  //   app.selectedCities = JSON.parse(app.selectedCities);
+  //   app.selectedCities.forEach(function(city) {
+  //     app.getForecast(city.key, city.label);
+  //   });
+  // } else {
+  //   /* The user is using the app for the first time, or the user has not
+  //    * saved any cities, so show the user some fake data. A real app in this
+  //    * scenario could guess the user's location via IP lookup and then inject
+  //    * that data into the page.
+  //    */
+  //   app.updateForecastCard(initialWeatherForecast);
+  //   app.selectedCities = [
+  //     {key: initialWeatherForecast.key, label: initialWeatherForecast.label}
+  //   ];
+  //   app.saveSelectedCities();
+  // }
 
   // TODO add service worker code here
   // Register the service worker (.js file)
