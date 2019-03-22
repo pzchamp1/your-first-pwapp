@@ -167,7 +167,7 @@
   app.getForecast = function(key, label) {
     // var statement = 'select * from weather.forecast where woeid=' + key;
     // var url = 'https://query.yahooapis.com/v1/public/yql?format=json&q=' +
-    var url = 'https://weather-ydn-yql.media.yahoo.com/forecastrss?' + key;
+    var url = 'https://weather-ydn-yql.media.yahoo.com/forecastrss?format=json&woeid=' + key;
     // TODO add cache logic here
     if ('caches' in window) {
       /*
@@ -188,26 +188,26 @@
       });
     }
     // Fetch the latest data.
-    var header = getOAuthHeader();
-    var request = new XMLHttpRequest();
-    request.setRequestHeader('Authorization', header.AuthHeader);
-    request.setRequestHeader('X-Yahoo-App-Id', header.AppId);
+    var header = getOAuthHeader(key);
+    var request = new XMLHttpRequest();    
     request.onreadystatechange = function() {
       if (request.readyState === XMLHttpRequest.DONE) {
         if (request.status === 200) {
           var response = JSON.parse(request.response);
-          var results = response.query.results;
-          results.key = key;
-          results.label = label;
-          results.created = response.query.current_observation.pubDate;
+          var results = response;//response.query.results;
+          results.location.woeid = key//results.key = key;
+          results.location.city = label;
+          results.current_observation.pubDate = response.current_observation.pubDate;
           app.updateForecastCard(results);
         }
       } else {
         // Return the initial weather forecast since no data is available.
-        app.updateForecastCard(initialWeatherForecast);
+        app.updateForecastCard(initialWeatherForecast_new);
       }
     };
     request.open('GET', url);
+    request.setRequestHeader('Authorization', header.AuthHeader);
+    request.setRequestHeader('X-Yahoo-App-Id', header.AppId);
     request.send();
   };
 
@@ -457,25 +457,25 @@
 
   app.selectedCities = localStorage.selectedCities;
 // -DEBUG
-  app.updateForecastCard(initialWeatherForecast_new);
+  //app.updateForecastCard(initialWeatherForecast_new);
 // -DEBUG
-  // if (app.selectedCities) {
-  //   app.selectedCities = JSON.parse(app.selectedCities);
-  //   app.selectedCities.forEach(function(city) {
-  //     app.getForecast(city.key, city.label);
-  //   });
-  // } else {
-  //   /* The user is using the app for the first time, or the user has not
-  //    * saved any cities, so show the user some fake data. A real app in this
-  //    * scenario could guess the user's location via IP lookup and then inject
-  //    * that data into the page.
-  //    */
-  //   app.updateForecastCard(initialWeatherForecast);
-  //   app.selectedCities = [
-  //     {key: initialWeatherForecast.key, label: initialWeatherForecast.label}
-  //   ];
-  //   app.saveSelectedCities();
-  // }
+  if (app.selectedCities) {
+    app.selectedCities = JSON.parse(app.selectedCities);
+    app.selectedCities.forEach(function(city) {
+      app.getForecast(city.key, city.label);
+    });
+  } else {
+    /* The user is using the app for the first time, or the user has not
+     * saved any cities, so show the user some fake data. A real app in this
+     * scenario could guess the user's location via IP lookup and then inject
+     * that data into the page.
+     */
+    app.updateForecastCard(initialWeatherForecast_new);
+    app.selectedCities = [
+      {key: initialWeatherForecast_new.location.woeid, label: initialWeatherForecast_new.location.city}
+    ];
+    app.saveSelectedCities();
+  }
 
   // TODO add service worker code here
   // Register the service worker (.js file)
