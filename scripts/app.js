@@ -162,13 +162,14 @@
    * freshest data.
    */
   app.getForecast = function(key, label) {
-    var statement = 'select * from weather.forecast where woeid=' + key;
-    var url = 'https://query.yahooapis.com/v1/public/yql?format=json&q=' +
-        statement;
+    var url = 'https://weather-ydn-yql.media.yahoo.com/forecastrss?' + key;
     // TODO add cache logic here
 
     // Fetch the latest data.
+    var header = getOAuthHeader();
     var request = new XMLHttpRequest();
+    request.setRequestHeader('Authorization', header.AuthHeader);
+    request.setRequestHeader('X-Yahoo-App-Id', header.AppId);
     request.onreadystatechange = function() {
       if (request.readyState === XMLHttpRequest.DONE) {
         if (request.status === 200) {
