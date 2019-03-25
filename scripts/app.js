@@ -162,7 +162,7 @@
    * freshest data.
    */
   app.getForecast = function(key, label) {
-    var url = 'https://weather-ydn-yql.media.yahoo.com/forecastrss?' + key;
+    var url = 'https://weather-ydn-yql.media.yahoo.com/forecastrss?format=json&woeid=' + key;
     // TODO add cache logic here
 
     // Fetch the latest data.
